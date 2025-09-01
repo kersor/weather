@@ -5,12 +5,14 @@ import { CustomInput } from '../ui/customInput/CustomInput'
 import { CustomButtonClose } from '../ui/customButton/customButtonClose/CustomButtonClose'
 import { funcGetCoordinates } from '../../scripts/api/getCoordinates'
 import { funcDebaunce } from '../../scripts/utils/debaunce'
+import { funcGetTemperatures } from '../../scripts/api/getTemperatures'
 
 interface Props {
     isOpen: boolean
     onOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
+const KEY_LOCAL_STORAGE = process.env.REACT_APP_KEY_LOCAL_STORAGE_WEATHER || "weather"
 const URL_IMAGES = process.env.REACT_APP_API_IMAGES
 
 export const Modal = memo(({
@@ -73,6 +75,17 @@ export const Modal = memo(({
     }
 
 
+    const funcChooseCity = async (city: City) => {
+        
+        const {data} = await funcGetTemperatures({latitude: city.latitude, longitude: city.longitude})
+        
+        const payload = {
+            daily: data.daily,
+            ...city
+        }
+
+        window.localStorage.setItem(KEY_LOCAL_STORAGE, JSON.stringify(payload))
+    }
 
 
 
@@ -91,7 +104,7 @@ export const Modal = memo(({
                             <div className={styles.list}>
                                 {
                                     citys.map((city: City) => (
-                                        <div key={city.admin1_id} className={styles.item}>
+                                        <div key={city.admin1_id} className={styles.item} onClick={() => funcChooseCity(city)}>
                                             <div className={styles.item_top}>
                                                 <img className={styles.item_photo} src={`${URL_IMAGES}/${city.country_code.toLowerCase()}.svg`} alt="" />
                                                 {city.name}
