@@ -10,6 +10,7 @@ body {
 body, html {
   height: 100%;
   width: 100%;
+  color: rgb(150, 150, 150);
 }
 
 code {

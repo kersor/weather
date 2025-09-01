@@ -4,10 +4,12 @@ import axios from 'axios';
 import { funcDebaunce } from './scripts/utils/debaunce';
 import { funcGetCoordinates } from './scripts/api/getCoordinates';
 import { City } from './scripts/types/city';
+import { Modal } from './components/modal/Modal';
 
 function App() {
   const [citys, setCitys] = useState<City[]>([])
   const [inputCity, setInputCity] = useState<string>("")
+  const [notFoundCity, setNotFoundCity] = useState<boolean>(false)
 
   const funcDebaunceCity = (city: string) => setInputCity(prev => city)
   const debaunce = funcDebaunce(funcDebaunceCity, 1000);
@@ -17,13 +19,19 @@ function App() {
   }
 
   useEffect(() => {
-    if (!inputCity.length) {
+    if (inputCity.length < 2) {
       setCitys(prev => [])
+      setNotFoundCity(prev => false)
       return
     }
     
     async function fecthData() {
       const coordinates = await funcGetCoordinates(inputCity)
+
+      if (coordinates === undefined) {
+        setNotFoundCity(prev => true)
+        return
+      }
       setCitys(prev => coordinates)
     }
 
@@ -33,16 +41,11 @@ function App() {
   return (
     <div className={styles.wrapper}>
       <div className={styles.container}>
-        <div className={styles.body}>
-          <input className={styles.input} type="text" onChange={funcOnChangeCity}/>
-          <div className={styles.list}>
-            {
-              citys.length && citys.map((city: City) => (
-                <div className={styles.item}>{city.name}</div>
-              ))
-            }
-          </div>
-        </div>
+        <Modal
+          citys={citys}
+          notFoundCity={notFoundCity}
+          funcOnChangeCity={funcOnChangeCity}
+        />
       </div>
     </div> 
   )
