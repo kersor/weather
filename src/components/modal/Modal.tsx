@@ -10,6 +10,7 @@ import { funcGetTemperatures } from '../../scripts/api/getTemperatures'
 interface Props {
     isOpen: boolean
     onOpen: React.Dispatch<React.SetStateAction<boolean>>
+    setValue: React.Dispatch<any>
 }
 
 const KEY_LOCAL_STORAGE = process.env.REACT_APP_KEY_LOCAL_STORAGE_WEATHER || "weather"
@@ -17,7 +18,8 @@ const URL_IMAGES = process.env.REACT_APP_API_IMAGES
 
 export const Modal = memo(({
     isOpen,
-    onOpen
+    onOpen,
+    setValue
 }: Props) => {
 
     const [citys, setCitys] = useState<City[]>([])
@@ -84,7 +86,9 @@ export const Modal = memo(({
             ...city
         }
 
+        setValue(payload)
         window.localStorage.setItem(KEY_LOCAL_STORAGE, JSON.stringify(payload))
+        onOpen(false)
     }
 
 
@@ -104,7 +108,7 @@ export const Modal = memo(({
                             <div className={styles.list}>
                                 {
                                     citys.map((city: City) => (
-                                        <div key={city.admin1_id} className={styles.item} onClick={() => funcChooseCity(city)}>
+                                        <div key={city.id} className={styles.item} onClick={() => funcChooseCity(city)}>
                                             <div className={styles.item_top}>
                                                 <img className={styles.item_photo} src={`${URL_IMAGES}/${city.country_code.toLowerCase()}.svg`} alt="" />
                                                 {city.name}

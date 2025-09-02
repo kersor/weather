@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styles from './App.module.css'
 import axios from 'axios';
 import { funcDebaunce } from './scripts/utils/debaunce';
@@ -7,6 +7,8 @@ import { City, CityLocalStorage } from './scripts/types/city';
 import { Modal } from './components/modal/Modal';
 import { CustomButton } from './components/ui/customButton/customButton/CustomButton';
 import { useCityLocalStorage } from './scripts/hooks/useCityLocalStorage';
+import { weatherCodeMap } from './scripts/const/weatherCode';
+import { days } from './scripts/const/days';
 
 const defaultState: CityLocalStorage = {
     admin1: "",          
@@ -45,21 +47,29 @@ function App() {
         <div className={styles.container}>
           <div className={styles.body}>
             <div className={styles.content}>
-                <div className={styles.city}>Moscow, Russia</div>
-                <div className={styles.weather}>
-                  <div className={styles.weather_nextDays}>
-                    <BlockWeatherNextDays />
-                    <BlockWeatherNextDays />
-                    <BlockWeatherNextDays />
-                  </div>
-                  <div className={styles.weather_nowDay}>123</div>
-                </div>
+                {
+                  value.name ? (
+                    <React.Fragment>
+                      <div className={styles.city}>{value.name}, {value.country}</div>
+                      <div className={styles.weather}>
+                        <div className={styles.weather_nowDay}>
+                          <BlockWeatherNowDay value={value} index={0} />
+                        </div>
+                        <div className={styles.weather_nextDays}>
+                          <BlockWeatherNextDays value={value} index={1}/>
+                          <BlockWeatherNextDays value={value} index={2}/>
+                          <BlockWeatherNextDays value={value} index={3}/>
+                        </div>
+                      </div>
+                    </React.Fragment>
+                  ) : (
+                    <div className={styles.city}>Choose City</div>
+                  )
+                }
             </div>
-            <div className={styles.footer}>
-               <CustomButton title='Open' onClick={() => setOpenModal(prev => true)} />
+            <div onClick={() => setOpenModal(prev => true)} className={styles.footer}>
+               List of cities
             </div>
-            
-           
           </div>
           
         </div>
@@ -67,22 +77,63 @@ function App() {
         <Modal
           isOpen={openModal}
           onOpen={setOpenModal}
+          setValue={setValue}
         />
       </div>
   )
 }
 
-const BlockWeatherNextDays = () => {
+const BlockWeatherNextDays = ({
+  value,
+  index
+}: {
+  value: CityLocalStorage
+  index: number
+}) => {
+  const date = new Date(value.daily.time[index])
+
+  const day = index === 1 ? "Tomorrow" : days[date.getDay()]
+  const temp_min = value.daily.temperature_2m_min[index]
+  const temp_max = value.daily.temperature_2m_max[index]
+  
   return (
     <div className={styles.blockWeatherNextDays}>
       <div className={styles.blockWeatherNextDays_date}>
-        <div>Tomorrow</div>
-        <div>Clear</div>
+        <div>{day}</div>
+        <div>{weatherCodeMap[value.daily.weathercode[index]]}</div>
       </div>
 
       <div className={styles.blockWeatherNextDays_temperature}>
-        <div>11°</div>
-        <div>/ 10°</div>
+        <div>{temp_max}°</div>
+        <div>/ {temp_min}°</div>
+      </div>
+    </div>
+  )
+}
+
+const BlockWeatherNowDay = ({
+  value,
+  index
+}: {
+  value: CityLocalStorage
+  index: number
+}) => {
+  const date = new Date(value.daily.time[index])
+
+  const day = index === 1 ? "Tomorrow" : days[date.getDay()]
+  const temp_min = value.daily.temperature_2m_min[index]
+  const temp_max = value.daily.temperature_2m_max[index]
+  
+  return (
+    <div className={styles.blockWeatherNowDay}>
+      <div className={styles.blockWeatherNowDay_date}>
+        <div>{day}</div>
+        <div>{weatherCodeMap[value.daily.weathercode[index]]}</div>
+      </div>
+
+      <div className={styles.blockWeatherNowDay_temperature}>
+        <div>{temp_max}°</div>
+        <div>/ {temp_min}°</div>
       </div>
     </div>
   )

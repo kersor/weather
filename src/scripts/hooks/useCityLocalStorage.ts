@@ -13,7 +13,6 @@ const funcGetLocalStorage = (key: string, defaultValue: CityLocalStorage) => {
 }
 
 export const useCityLocalStorage = (key: string, defaultValue: CityLocalStorage) => {
-    console.log(key)
     const [value, setValue] = useState(() => {
         return funcGetLocalStorage(key, defaultValue)
     })
